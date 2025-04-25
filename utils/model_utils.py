@@ -1,20 +1,14 @@
-import pandas as pd
 from sklearn.linear_model import LinearRegression
+import pandas as pd
+import numpy as np
 
-def train_price_model(df):
-    df["Month"] = pd.to_datetime(df["Date"]).dt.month
-    df["Year"] = pd.to_datetime(df["Date"]).dt.year
-    X = df[["Month", "Year"]]
-    y = df["Modal Price"]
+def train_price_model(data):
     model = LinearRegression()
-    model.fit(X, y)
+    data["Month"] = pd.to_datetime(data["Date"]).dt.month
+    model.fit(data[["Month"]], data["Modal Price"])
     return model
 
-def predict_price(model, months_ahead, last_month, last_year):
-    preds = []
-    for i in range(months_ahead):
-        m = (last_month + i) % 12 or 12
-        y = last_year + (last_month + i - 1) // 12
-        pred = model.predict([[m, y]])[0]
-        preds.append((f"{m}-{y}", pred))
-    return preds
+def predict_price(model, months_ahead, start_month, start_year):
+    months = [(start_year, start_month + i) for i in range(months_ahead)]
+    predicted_prices = model.predict(np.array([m[1] for m in months]).reshape(-1, 1))
+    return months, predicted_prices
