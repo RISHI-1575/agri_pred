@@ -1,7 +1,5 @@
 import streamlit as st
-from utils.price_prediction import price_prediction_page
-from utils.crop_recommendation import crop_recommendation_page
-from utils.marketplace import marketplace_page
+from utils.auth_utils import validate_login, register_user
 
 st.set_page_config(page_title="AgriPredict", layout="wide")
 
@@ -34,8 +32,8 @@ if not st.session_state.logged_in:
         role = st.radio("Login as", ["farmer", "company"], key="login_role")
 
         if st.button("Login"):
-            # Mock validation (replace with real validation)
-            if username == "user" and password == "pass":
+            # Validate login using the `validate_login` function
+            if validate_login(username, password, role):
                 # Update session state and navigate to the main app
                 st.session_state.logged_in = True
                 st.session_state.role = role
@@ -51,8 +49,12 @@ if not st.session_state.logged_in:
         new_role = st.radio("Register as", ["farmer", "company"], key="signup_role")
 
         if st.button("Sign Up"):
-            # Mock registration logic
-            st.success("🎉 Successfully signed up! Please log in to continue.")
+            # Register a new user using the `register_user` function
+            message = register_user(new_username, new_password, new_role)
+            if "🎉" in message:
+                st.success(message)
+            else:
+                st.error(message)
 else:
     # Main App Page (Post-Login)
     st.sidebar.title("📚 Navigation")
@@ -61,7 +63,7 @@ else:
     # Sidebar Navigation
     selected_page = st.sidebar.radio(
         "Go to",
-        ["Price Prediction", "Crop Recommendation", "Marketplace"]
+        ["Home", "Price Prediction", "Crop Recommendation", "Marketplace"]
     )
 
     # Logout Button
@@ -72,9 +74,15 @@ else:
         set_page("login")
 
     # Main Content Based on Navigation
-    if selected_page == "Price Prediction":
+    if selected_page == "Home":
+        st.title("Welcome to AgriPredict!")
+        st.write("Select a feature from the sidebar to get started.")
+    elif selected_page == "Price Prediction":
+        from utils.price_prediction import price_prediction_page
         price_prediction_page()
     elif selected_page == "Crop Recommendation":
+        from utils.crop_recommendation import crop_recommendation_page
         crop_recommendation_page()
     elif selected_page == "Marketplace":
+        from utils.marketplace import marketplace_page
         marketplace_page()
