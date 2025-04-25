@@ -21,9 +21,12 @@ if not st.session_state.logged_in:
 
         if st.button("Login"):
             if validate_login(username, password, role):
+                # Update session state
                 st.session_state.logged_in = True
                 st.session_state.role = role
                 st.success("✅ Logged in successfully!")
+                
+                # Safely rerun the app
                 st.experimental_rerun()
             else:
                 st.error("❌ Invalid credentials. Please check your username, password, and role.")
