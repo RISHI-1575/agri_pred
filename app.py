@@ -1,8 +1,7 @@
 import streamlit as st
-from utils.auth_utils import validate_login, register_user
-from utils.price_prediction import get_price_prediction
-from utils.crop_recommendation import recommend_crops
-from utils.marketplace import get_marketplace_items
+from utils.price_prediction import price_prediction_page
+from utils.crop_recommendation import crop_recommendation_page
+from utils.marketplace import marketplace_page
 
 st.set_page_config(page_title="AgriPredict", layout="wide")
 
@@ -21,7 +20,7 @@ def set_page(page_name):
     """
     st.session_state.current_page = page_name
 
-# Access Control
+# Restrict Access to Pages
 if not st.session_state.logged_in:
     # Login and Sign-Up Page
     st.title("🌱 Welcome to AgriPredict")
@@ -35,7 +34,8 @@ if not st.session_state.logged_in:
         role = st.radio("Login as", ["farmer", "company"], key="login_role")
 
         if st.button("Login"):
-            if validate_login(username, password, role):
+            # Mock validation (replace with real validation)
+            if username == "user" and password == "pass":
                 # Update session state and navigate to the main app
                 st.session_state.logged_in = True
                 st.session_state.role = role
@@ -51,12 +51,8 @@ if not st.session_state.logged_in:
         new_role = st.radio("Register as", ["farmer", "company"], key="signup_role")
 
         if st.button("Sign Up"):
-            message = register_user(new_username, new_password, new_role)
-            if "🎉" in message:
-                st.success(message)
-            else:
-                st.error(message)
-
+            # Mock registration logic
+            st.success("🎉 Successfully signed up! Please log in to continue.")
 else:
     # Main App Page (Post-Login)
     st.sidebar.title("📚 Navigation")
@@ -65,8 +61,7 @@ else:
     # Sidebar Navigation
     selected_page = st.sidebar.radio(
         "Go to",
-        ["Price Prediction", "Crop Recommendation", "Marketplace"],
-        key="navigation"
+        ["Price Prediction", "Crop Recommendation", "Marketplace"]
     )
 
     # Logout Button
@@ -78,36 +73,8 @@ else:
 
     # Main Content Based on Navigation
     if selected_page == "Price Prediction":
-        st.title("📈 Crop Price Prediction")
-        # Crop Price Prediction Logic
-        crop = st.selectbox("Select Crop", ["Wheat", "Rice", "Maize"])
-        city = st.text_input("Enter City")
-        if st.button("Predict Price"):
-            if crop and city:
-                prediction = get_price_prediction(crop, city)
-                st.success(f"The predicted price for {crop} in {city} is ₹{prediction}/kg.")
-            else:
-                st.error("Please enter both crop and city.")
-
+        price_prediction_page()
     elif selected_page == "Crop Recommendation":
-        st.title("🌾 Crop Recommendation")
-        # Crop Recommendation Logic
-        soil_type = st.selectbox("Select Soil Type", ["Clay", "Sandy", "Silt", "Loam"])
-        rainfall = st.number_input("Enter Average Rainfall (mm)", min_value=0)
-        if st.button("Recommend Crops"):
-            if soil_type and rainfall:
-                recommendations = recommend_crops(soil_type, rainfall)
-                st.success(f"Recommended crops for {soil_type} soil and {rainfall}mm rainfall: {', '.join(recommendations)}")
-            else:
-                st.error("Please enter valid soil type and rainfall.")
-
+        crop_recommendation_page()
     elif selected_page == "Marketplace":
-        st.title("🛒 Marketplace")
-        # Marketplace Logic
-        items = get_marketplace_items()
-        if items:
-            for item in items:
-                st.write(f"**{item['name']}** - ₹{item['price']}/kg")
-                st.write(f"Seller: {item['seller']}")
-        else:
-            st.info("No items available in the marketplace.")
+        marketplace_page()
