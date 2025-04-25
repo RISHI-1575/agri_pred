@@ -13,7 +13,7 @@ st.title("🌱 Welcome to AgriPredict")
 if not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["🔒 Login", "📝 Sign Up"])
 
-    # Login tab
+    # Login Tab
     with tab1:
         username = st.text_input("Username", key="login_user")
         password = st.text_input("Password", type="password", key="login_pass")
@@ -28,7 +28,7 @@ if not st.session_state.logged_in:
             else:
                 st.error("❌ Invalid credentials. Please check your username, password, and role.")
 
-    # Signup tab
+    # Signup Tab
     with tab2:
         new_username = st.text_input("Choose a Username", key="signup_user")
         new_password = st.text_input("Choose a Password", type="password", key="signup_pass")
