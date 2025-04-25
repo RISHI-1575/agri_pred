@@ -38,15 +38,22 @@ def validate_login(username, password, role):
     Returns True if the user is authenticated, otherwise False.
     """
     users = load_users()
-    print("Loaded users:")
+    print("DEBUG: Loaded users data:")
     print(users)
-    print(f"Attempting login with - Username: {username}, Password: {password}, Role: {role}")
+    print(f"DEBUG: Attempting login with - Username: {username}, Password: {password}, Role: {role}")
+    
     user_match = users[
         (users["username"] == username) &
         (users["password"] == password) &
         (users["role"] == role)
     ]
-    return not user_match.empty  # True if match found, False otherwise
+    
+    if not user_match.empty:
+        print("DEBUG: Login successful!")
+        return True
+    else:
+        print("DEBUG: Login failed.")
+        return False
 
 def register_user(username, password, role):
     """
