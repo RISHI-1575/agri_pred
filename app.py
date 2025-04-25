@@ -13,10 +13,14 @@ if "current_page" not in st.session_state:
 
 # Page Navigation Logic
 def set_page(page_name):
+    """
+    Updates session state to navigate to the specified page.
+    """
     st.session_state.current_page = page_name
 
-# Login and Sign-Up Page
-if st.session_state.current_page == "login":
+# Access Control
+if not st.session_state.logged_in:
+    # Login and Sign-Up Page
     st.title("🌱 Welcome to AgriPredict")
 
     tab1, tab2 = st.tabs(["🔒 Login", "📝 Sign Up"])
@@ -33,7 +37,7 @@ if st.session_state.current_page == "login":
                 st.session_state.logged_in = True
                 st.session_state.role = role
                 st.success("✅ Logged in successfully!")
-                set_page("main")  # Redirect to the main app page
+                set_page("main")  # Navigate to the main page
             else:
                 st.error("❌ Invalid credentials. Please check your username, password, and role.")
 
@@ -50,21 +54,32 @@ if st.session_state.current_page == "login":
             else:
                 st.error(message)
 
-# Main App Page (Post-Login)
-elif st.session_state.current_page == "main":
+else:
+    # Main App Page (Post-Login)
     st.sidebar.title("📚 Navigation")
     st.sidebar.markdown(f"👤 Logged in as **{st.session_state.role.capitalize()}**")
-    selected_page = st.sidebar.radio("Go to", ["Price Prediction", "Crop Recommendation", "Marketplace"])
 
+    # Sidebar Navigation
+    selected_page = st.sidebar.radio(
+        "Go to",
+        ["Price Prediction", "Crop Recommendation", "Marketplace"],
+        key="navigation"
+    )
+
+    # Logout Button
     if st.sidebar.button("Logout"):
         # Reset session state and navigate back to login
         st.session_state.logged_in = False
         st.session_state.role = None
         set_page("login")
 
+    # Main Content Based on Navigation
     if selected_page == "Price Prediction":
-        st.write("Redirecting to Price Prediction...")
+        st.title("📈 Crop Price Prediction")
+        st.write("This is the crop price prediction page. Implement your logic here.")
     elif selected_page == "Crop Recommendation":
-        st.write("Redirecting to Crop Recommendation...")
+        st.title("🌾 Crop Recommendation")
+        st.write("This is the crop recommendation page. Implement your logic here.")
     elif selected_page == "Marketplace":
-        st.write("Redirecting to Marketplace...")
+        st.title("🛒 Marketplace")
+        st.write("This is the marketplace page. Implement your logic here.")
