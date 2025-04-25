@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from utils.auth_utils import login  # Reuse existing login logic
+from utils.auth_utils import login  # Ensure this function validates correctly
 
 st.set_page_config(page_title="AgriPredict", layout="wide")
 
@@ -14,6 +14,17 @@ if not os.path.exists(user_file):
 # Initialize session state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+    st.session_state.role = None
+
+# Login logic (mocked here if `login` function doesn't handle it)
+def login(username, password, role):
+    users_df = pd.read_csv(user_file)
+    user_match = users_df[
+        (users_df["username"] == username) & 
+        (users_df["password"] == password) & 
+        (users_df["role"] == role)
+    ]
+    return not user_match.empty
 
 if not st.session_state.logged_in:
     st.title("🌱 Welcome to AgriPredict")
@@ -56,7 +67,27 @@ else:
     st.sidebar.markdown(f"👤 Logged in as **{st.session_state.role.capitalize()}**")
     selected_page = st.sidebar.radio("Go to", ["Price Prediction", "Marketplace"])
 
+    # Restrict navigation to logged-in users
     if selected_page == "Price Prediction":
-        st.switch_page("pages/1_Price_Prediction.py")
+        st.experimental_set_query_params(page="1_Price_Prediction")
+        st.write("🚧 Redirecting to Price Prediction...")
+        st.experimental_rerun()
+
     elif selected_page == "Marketplace":
-        st.switch_page("pages/2_Marketplace.py")
+        st.experimental_set_query_params(page="2_Marketplace")
+        st.write("🚧 Redirecting to Marketplace...")
+        st.experimental_rerun()
+
+# Protect other pages (e.g., Price Prediction and Marketplace)
+if "page" in st.experimental_get_query_params():
+    page = st.experimental_get_query_params()["page"][0]
+    if not st.session_state.logged_in:
+        st.error("❌ You must be logged in to access this page.")
+    elif page == "1_Price_Prediction":
+        # Price Prediction Page Code
+        st.title("📈 Price Prediction")
+        st.write("Welcome to the price prediction page.")
+    elif page == "2_Marketplace":
+        # Marketplace Page Code
+        st.title("🛒 Marketplace")
+        st.write("Welcome to the marketplace page.")
