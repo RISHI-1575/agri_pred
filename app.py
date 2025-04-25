@@ -79,8 +79,8 @@ else:
         st.experimental_rerun()
 
 # Protect other pages (e.g., Price Prediction and Marketplace)
-if "page" in st.experimental_get_query_params():
-    page = st.experimental_get_query_params()["page"][0]
+if "page" in st.query_params:
+    page = st.query_params["page"][0]
     if not st.session_state.logged_in:
         st.error("❌ You must be logged in to access this page.")
     elif page == "1_Price_Prediction":
