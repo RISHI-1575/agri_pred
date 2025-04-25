@@ -1,18 +1,34 @@
 import streamlit as st
-import pandas as pd
+from utils.auth_utils import login
 
-df = pd.read_csv("data/marketplace_data.csv")
-st.title("🛒 Crop Marketplace")
+st.set_page_config(page_title="AgriPredict", layout="wide")
 
-if st.session_state.role == "company":
-    with st.expander("📢 Post Crop Requirement"):
-        crop = st.text_input("Crop Name")
-        qty = st.number_input("Quantity (kg)", 0)
-        price = st.number_input("Price Offered", 0)
-        contact = st.text_input("Contact")
-        deadline = st.date_input("Deadline")
-        if st.button("Post Requirement"):
-            st.success("Posted successfully! (Simulated)")
+# Initialize session state variables
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-st.subheader("📋 All Open Requirements")
-st.dataframe(df)
+if not st.session_state.logged_in:
+    # Login UI
+    st.title("🔐 Login to AgriPredict")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    role = st.radio("Login as", ["farmer", "company"])
+    
+    if st.button("Login"):
+        if login(username, password, role):
+            st.session_state.logged_in = True
+            st.session_state.role = role
+            st.success("✅ Logged in successfully!")
+            st.experimental_rerun()
+        else:
+            st.error("❌ Invalid credentials.")
+else:
+    # After login: show navigation
+    st.sidebar.title("📚 Navigation")
+    st.sidebar.markdown(f"👤 Logged in as **{st.session_state.role.capitalize()}**")
+    selected_page = st.sidebar.radio("Go to", ["Price Prediction", "Marketplace"])
+
+    if selected_page == "Price Prediction":
+        st.switch_page("pages/1_Price_Prediction.py")
+    elif selected_page == "Marketplace":
+        st.switch_page("pages/2_Marketplace.py")
