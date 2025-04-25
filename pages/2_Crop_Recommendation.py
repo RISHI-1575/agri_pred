@@ -1,11 +1,17 @@
 import streamlit as st
 import pandas as pd
 
-df = pd.read_csv("data/recommendation_data.csv")
-st.title("🌾 Crop Recommendation")
+st.title("🌾 Crop Recommendation System")
 
-location = st.selectbox("Select Your Region", df["Location"].unique())
+soil_type = st.selectbox("Select Soil Type", ["Loamy", "Sandy", "Clay"])
+region = st.selectbox("Select Region", ["North Karnataka", "South Karnataka"])
+land_size = st.number_input("Enter Land Size (in acres)", min_value=1.0)
 
-st.subheader("Recommended Crops")
-filtered = df[df["Location"] == location].sort_values(by="Profit_Percent", ascending=False)
-st.dataframe(filtered[["Crop", "Growth_Time", "Avg_Price", "Profit_Percent"]])
+if st.button("Get Recommendations"):
+    # Dummy logic for recommendation
+    recommendations = [
+        {"Crop": "Tomato", "Expected Return (₹)": 50000, "Demand Score": 85},
+        {"Crop": "Onion", "Expected Return (₹)": 45000, "Demand Score": 80},
+    ]
+    df = pd.DataFrame(recommendations)
+    st.table(df)
