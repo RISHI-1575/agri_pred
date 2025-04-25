@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-from utils.auth_utils import login  # Ensure this function validates correctly
 
 st.set_page_config(page_title="AgriPredict", layout="wide")
 
@@ -16,15 +15,24 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.role = None
 
-# Login logic (mocked here if `login` function doesn't handle it)
+# Login logic
 def login(username, password, role):
-    users_df = pd.read_csv(user_file)
-    user_match = users_df[
-        (users_df["username"] == username) & 
-        (users_df["password"] == password) & 
-        (users_df["role"] == role)
-    ]
-    return not user_match.empty
+    try:
+        # Load the users.csv file
+        users_df = pd.read_csv(user_file)
+        print("Loaded users:", users_df)  # Debugging: Print loaded users
+        print(f"Trying to log in with: {username}, {password}, {role}")  # Debugging
+        
+        # Check if user exists with matching credentials
+        user_match = users_df[
+            (users_df["username"] == username) & 
+            (users_df["password"] == password) & 
+            (users_df["role"] == role)
+        ]
+        return not user_match.empty  # True if match found, False otherwise
+    except Exception as e:
+        print("Error during login:", e)  # Debugging: Print any errors
+        return False
 
 if not st.session_state.logged_in:
     st.title("🌱 Welcome to AgriPredict")
@@ -43,7 +51,7 @@ if not st.session_state.logged_in:
                 st.success("✅ Logged in successfully!")
                 st.experimental_rerun()
             else:
-                st.error("❌ Invalid credentials.")
+                st.error("❌ Invalid credentials. Please check your username, password, and role.")
 
     with tab2:
         new_username = st.text_input("Choose a Username", key="signup_user")
@@ -51,23 +59,25 @@ if not st.session_state.logged_in:
         new_role = st.radio("Register as", ["farmer", "company"], key="signup_role")
 
         if st.button("Sign Up"):
-            users_df = pd.read_csv(user_file)
-            if new_username in users_df["username"].values:
-                st.error("⚠️ Username already exists. Please choose another.")
-            elif not new_username or not new_password:
-                st.error("⚠️ Please fill in all fields.")
-            else:
-                new_entry = pd.DataFrame([[new_username, new_password, new_role]], columns=["username", "password", "role"])
-                users_df = pd.concat([users_df, new_entry], ignore_index=True)
-                users_df.to_csv(user_file, index=False)
-                st.success("🎉 Account created! You can now log in.")
+            try:
+                users_df = pd.read_csv(user_file)
+                if new_username in users_df["username"].values:
+                    st.error("⚠️ Username already exists. Please choose another.")
+                elif not new_username or not new_password:
+                    st.error("⚠️ Please fill in all fields.")
+                else:
+                    new_entry = pd.DataFrame([[new_username, new_password, new_role]], columns=["username", "password", "role"])
+                    users_df = pd.concat([users_df, new_entry], ignore_index=True)
+                    users_df.to_csv(user_file, index=False)
+                    st.success("🎉 Account created! You can now log in.")
+            except Exception as e:
+                st.error(f"⚠️ Error during sign-up: {e}")
 else:
     # After login: show navigation
     st.sidebar.title("📚 Navigation")
     st.sidebar.markdown(f"👤 Logged in as **{st.session_state.role.capitalize()}**")
     selected_page = st.sidebar.radio("Go to", ["Price Prediction", "Marketplace"])
 
-    # Restrict navigation to logged-in users
     if selected_page == "Price Prediction":
         st.experimental_set_query_params(page="1_Price_Prediction")
         st.write("🚧 Redirecting to Price Prediction...")
