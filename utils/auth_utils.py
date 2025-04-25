@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 # File path to the user data CSV file
 USER_FILE = "data/users.csv"
@@ -9,16 +10,27 @@ def load_users():
     Returns a pandas DataFrame of user credentials.
     """
     try:
-        return pd.read_csv(USER_FILE)
-    except FileNotFoundError:
-        # If user file doesn't exist, create an empty DataFrame with required columns
+        # Check if the file exists
+        if not os.path.exists(USER_FILE):
+            # Create an empty DataFrame with required columns if file doesn't exist
+            users_df = pd.DataFrame(columns=["username", "password", "role"])
+            users_df.to_csv(USER_FILE, index=False)
+        else:
+            # Load the existing user data
+            users_df = pd.read_csv(USER_FILE)
+        return users_df
+    except Exception as e:
+        print("Error loading users:", e)
         return pd.DataFrame(columns=["username", "password", "role"])
 
 def save_users(users_df):
     """
     Save the updated users' DataFrame to the CSV file.
     """
-    users_df.to_csv(USER_FILE, index=False)
+    try:
+        users_df.to_csv(USER_FILE, index=False)
+    except Exception as e:
+        print("Error saving users:", e)
 
 def validate_login(username, password, role):
     """
