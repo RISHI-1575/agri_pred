@@ -38,6 +38,9 @@ def validate_login(username, password, role):
     Returns True if the user is authenticated, otherwise False.
     """
     users = load_users()
+    print("Loaded users:")
+    print(users)
+    print(f"Attempting login with - Username: {username}, Password: {password}, Role: {role}")
     user_match = users[
         (users["username"] == username) &
         (users["password"] == password) &
