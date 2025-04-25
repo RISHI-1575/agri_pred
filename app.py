@@ -1,5 +1,8 @@
 import streamlit as st
 from utils.auth_utils import validate_login, register_user
+from utils.price_prediction import get_price_prediction
+from utils.crop_recommendation import recommend_crops
+from utils.marketplace import get_marketplace_items
 
 st.set_page_config(page_title="AgriPredict", layout="wide")
 
@@ -76,10 +79,35 @@ else:
     # Main Content Based on Navigation
     if selected_page == "Price Prediction":
         st.title("📈 Crop Price Prediction")
-        st.write("This is the crop price prediction page. Implement your logic here.")
+        # Crop Price Prediction Logic
+        crop = st.selectbox("Select Crop", ["Wheat", "Rice", "Maize"])
+        city = st.text_input("Enter City")
+        if st.button("Predict Price"):
+            if crop and city:
+                prediction = get_price_prediction(crop, city)
+                st.success(f"The predicted price for {crop} in {city} is ₹{prediction}/kg.")
+            else:
+                st.error("Please enter both crop and city.")
+
     elif selected_page == "Crop Recommendation":
         st.title("🌾 Crop Recommendation")
-        st.write("This is the crop recommendation page. Implement your logic here.")
+        # Crop Recommendation Logic
+        soil_type = st.selectbox("Select Soil Type", ["Clay", "Sandy", "Silt", "Loam"])
+        rainfall = st.number_input("Enter Average Rainfall (mm)", min_value=0)
+        if st.button("Recommend Crops"):
+            if soil_type and rainfall:
+                recommendations = recommend_crops(soil_type, rainfall)
+                st.success(f"Recommended crops for {soil_type} soil and {rainfall}mm rainfall: {', '.join(recommendations)}")
+            else:
+                st.error("Please enter valid soil type and rainfall.")
+
     elif selected_page == "Marketplace":
         st.title("🛒 Marketplace")
-        st.write("This is the marketplace page. Implement your logic here.")
+        # Marketplace Logic
+        items = get_marketplace_items()
+        if items:
+            for item in items:
+                st.write(f"**{item['name']}** - ₹{item['price']}/kg")
+                st.write(f"Seller: {item['seller']}")
+        else:
+            st.info("No items available in the marketplace.")
