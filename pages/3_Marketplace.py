@@ -1,34 +1,25 @@
 import streamlit as st
-from utils.auth_utils import login
+import pandas as pd
 
-st.set_page_config(page_title="AgriPredict", layout="wide")
+st.title("🛒 Marketplace")
 
-# Initialize session state variables
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+df = pd.read_csv("data/marketplace_data.csv")
+st.dataframe(df)
 
-if not st.session_state.logged_in:
-    # Login UI
-    st.title("🔐 Login to AgriPredict")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    role = st.radio("Login as", ["farmer", "company"])
-    
-    if st.button("Login"):
-        if login(username, password, role):
-            st.session_state.logged_in = True
-            st.session_state.role = role
-            st.success("✅ Logged in successfully!")
-            st.experimental_rerun()
-        else:
-            st.error("❌ Invalid credentials.")
+if st.session_state.role == "company":
+    st.subheader("Post a Requirement")
+    company = st.text_input("Company Name")
+    crop = st.text_input("Crop")
+    quantity = st.number_input("Quantity (kg)", min_value=1)
+    price = st.number_input("Price (₹/kg)", min_value=1.0)
+    deadline = st.date_input("Deadline")
+    contact = st.text_input("Contact Info")
+
+    if st.button("Submit"):
+        new_entry = pd.DataFrame([[company, crop, quantity, price, deadline, contact]],
+                                 columns=df.columns)
+        df = pd.concat([df, new_entry], ignore_index=True)
+        df.to_csv("data/marketplace_data.csv", index=False)
+        st.success("Requirement posted successfully!")
 else:
-    # After login: show navigation
-    st.sidebar.title("📚 Navigation")
-    st.sidebar.markdown(f"👤 Logged in as **{st.session_state.role.capitalize()}**")
-    selected_page = st.sidebar.radio("Go to", ["Price Prediction", "Marketplace"])
-
-    if selected_page == "Price Prediction":
-        st.switch_page("pages/1_Price_Prediction.py")
-    elif selected_page == "Marketplace":
-        st.switch_page("pages/2_Marketplace.py")
+    st.error("Only companies can post requirements.")
